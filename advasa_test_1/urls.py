@@ -7,6 +7,7 @@ urlpatterns = [
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('core.urls')),
+    path("", include("core.urls_pages")),
 ]
 
 from django.views.generic import TemplateView

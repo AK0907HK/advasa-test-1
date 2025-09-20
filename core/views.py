@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.generic import TemplateView
+from .serializers import ApplicationCreateSerializer
+from .models import Application
 
 class UserCreateView(generics.CreateAPIView):
     serializer_class = UserCreateSerializer
@@ -23,3 +25,17 @@ class MeView(APIView):
 
 class LoginPageView(TemplateView):
     template_name = "login.html"
+
+class ApplicationCreateView(generics.CreateAPIView):
+    serializer_class = ApplicationCreateSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Application.objects.all()
+
+class LoginPageView(TemplateView):
+    template_name = "login.html"       
+    
+class ApplyPageView(TemplateView):
+    template_name = "apply.html"
+
+class CompletePageView(TemplateView):
+    template_name = "complete.html"   

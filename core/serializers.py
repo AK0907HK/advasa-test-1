@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from django.db import transaction
+from .models import Application, UserProfile
 
 User = get_user_model()
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    # 任意。指定があれば残高に反映（1以上の整数のみ）
+
     initial_allowance = serializers.IntegerField(required=False)
 
     class Meta:
@@ -26,7 +28,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         user = User(username=username)
         user.set_password(password)
-        user.save()  # signals で profile が自動生成される
+        user.save()  
 
         if initial is not None:
             prof = user.profile
@@ -34,3 +36,29 @@ class UserCreateSerializer(serializers.ModelSerializer):
             prof.save(update_fields=["available_amount"])
 
         return user
+
+class ApplicationCreateSerializer(serializers.ModelSerializer):
+    
+    amount = serializers.IntegerField(min_value=1)
+
+    class Meta:
+        model = Application
+        fields = ("id", "amount", "status", "created_at")
+        read_only_fields = ("id", "status", "created_at")
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        amount = validated_data["amount"]
+
+        with transaction.atomic():
+            profile = UserProfile.objects.select_for_update().get(user=user)
+
+            if profile.available_amount < amount:
+                raise serializers.ValidationError({"amount": ["申請可能額を超えています"]})
+
+            profile.available_amount -= amount
+            profile.save(update_fields=["available_amount"])
+
+            app = Application.objects.create(user=user, amount=amount)
+
+        return app

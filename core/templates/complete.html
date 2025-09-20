@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>Complete</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <h1>申請完了</h1>
+  <p>申請ID: <span id="id">--</span></p>
+  <p>金額: <span id="amount">--</span></p>
+  <p>日時: <span id="created_at">--</span></p>
+
+  <p><a href="/apply/">申請画面へ戻る</a></p>
+  <p><a href="/history/">履歴を見る（※未実装なら後で）</a></p>
+
+  <script>
+    const raw = sessionStorage.getItem("last_application");
+    if (!raw) {
+      location.href = "/apply/";
+    } else {
+      const a = JSON.parse(raw);
+      document.getElementById("id").textContent = a.id;
+      document.getElementById("amount").textContent = a.amount;
+      document.getElementById("created_at").textContent = a.created_at;
+    }
+  </script>
+</body>
+</html>
