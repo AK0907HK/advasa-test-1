@@ -23,6 +23,7 @@ services:
       - .env
     depends_on:
       - db
+    restart: unless-stopped  
 
 volumes:
   db_data:
