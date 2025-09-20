@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django_extensions',
 ]
 
-# TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"]
+#TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
