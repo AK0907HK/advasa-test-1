@@ -44,29 +44,26 @@
         });
 
         if (!res.ok) {
-          const err = await res.json().catch(()=>({detail:"Login failed"}));
-          errorBox.textContent = err.detail || "Login failed";
+          const err = await res.json().catch(()=>({detail:"ログインに失敗しました"}));
+          errorBox.textContent = err.detail || "ログインに失敗しました";
           return;
         }
 
         const json = await res.json();
-        // 保存（今回の簡易実装では localStorage）
         localStorage.setItem("access", json.access);
         localStorage.setItem("refresh", json.refresh);
 
-        // 動作確認：/api/me を叩いてみる
         const me = await fetch("/api/me/", {
           headers: { Authorization: "Bearer " + json.access },
         });
 
         if (me.ok) {
-          // 本番では /apply へ。今は /apply 未実装なら /login に留まってOK
-          window.location.href = "/apply/"; // 先に作る予定がなければ適宜変更
+          window.location.href = "/apply/"; 
         } else {
-          errorBox.textContent = "Logged in, but /api/me failed.";
+          errorBox.textContent = "ログインしましたが、ユーザー情報を読み込めませんでした。";
         }
       } catch (e) {
-        errorBox.textContent = "Network error";
+        errorBox.textContent = "ネットワークエラー";
       }
     });
   </script>

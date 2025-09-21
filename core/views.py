@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from django.views.generic import TemplateView
 from .serializers import ApplicationCreateSerializer
 from .models import Application
+from .serializers import ApplicationListSerializer
 
 class UserCreateView(generics.CreateAPIView):
     serializer_class = UserCreateSerializer
@@ -38,4 +39,18 @@ class ApplyPageView(TemplateView):
     template_name = "apply.html"
 
 class CompletePageView(TemplateView):
-    template_name = "complete.html"   
+    template_name = "complete.html"  
+
+class ApplicationListView(generics.ListAPIView):
+    serializer_class = ApplicationListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Application.objects
+            .filter(user=self.request.user)
+            .order_by("-created_at")
+        )
+
+class HistoryPageView(TemplateView):
+    template_name = "history.html"    

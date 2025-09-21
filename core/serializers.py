@@ -62,3 +62,8 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             app = Application.objects.create(user=user, amount=amount)
 
         return app
+
+class ApplicationListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Application
+        fields = ("id", "amount", "status", "created_at")        
