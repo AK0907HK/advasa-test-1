@@ -22,6 +22,9 @@ curl -X POST http://localhost:8000/api/users/ \
 # 5. アプリ上の操作
 ログイン後、申し込み、申し込み詳細/履歴などの各種機能の操作を行う。
 
+# 6. admin機能について
+"docker compose exec web python manage.py createsuperuser"などで管理用ユーザー作成後、
+http://localhost:8000/admin/で認証後に各種操作を行う
 ```
 
 # 実装/未実装機能一覧
@@ -40,8 +43,6 @@ curl -X POST http://localhost:8000/api/users/ \
   - 残高不足で 400 が返る
   - 管理コマンド
 - 管理コマンド  
-
-## 未実装み機能
 - admin機能
 
 # 時間配分や優先順位
