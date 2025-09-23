@@ -1,5 +1,9 @@
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from django.core.management import call_command
+from django.test import TestCase
+from core.models import UserProfile
+from django.contrib.auth import get_user_model
 
 class CoreTests(APITestCase):
     def signup(self, username="u", password="pw", allowance=5000):
@@ -37,3 +41,18 @@ class CoreTests(APITestCase):
     def test_apply_insufficient_returns_400(self):
         res = self.c.post("/api/applications/", {"amount": 999999}, format="json")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+User = get_user_model()
+
+class AddAllowanceCommandTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pass")
+        self.profile = self.user.profile
+        self.profile.available_amount = 100
+        self.profile.save()
+
+    def test_add_allowance_command_increments_amount(self):
+        call_command("add_allowance", amount=50)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.available_amount, 150)

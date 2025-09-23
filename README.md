@@ -1,44 +1,69 @@
-advasa-test-1
-================
+# 動作手順
+```
+# 前提
+git cloneによりリポジトリをコピーしていること
+".env.example"を".env"へリネームすること
 
-Docker Compose で Django を起動するための最小雛形です。実装（モデル/シリアライザ/ビュー/テンプレート/JWT/管理コマンド/テスト）は候補者の課題として未実装です。
+# 1. コンテナを起動
+docker compose up --build -d
 
-含まれるもの
-- Django 4.2 / PostgreSQL / docker-compose 一式
-- ライブラリは DRF と SimpleJWT を requirements に含め済み（設定は未適用）
+# 2. マイグレーション
+docker compose exec web python manage.py migrate
 
-前提
-- Docker / Docker Compose がインストール済み
+# 3. 初期ユーザー作成
+例）
+curl -X POST http://localhost:8000/api/users/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"pass1234","initial_allowance":5000}'
 
-Docker/Compose のインストール
-- macOS (Docker Desktop 推奨)
-  - `brew install --cask docker`
-  - アプリケーションから Docker を起動（初回は権限付与が必要）
-  - 確認: `docker --version && docker compose version`
-- Ubuntu/Debian（公式レポジトリ）
-  - `sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg`
-  - `sudo install -m 0755 -d /etc/apt/keyrings`
-  - `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
-  - `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
-  - `sudo apt-get update`
-  - `sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin`
-  - （任意）非rootで実行: `sudo usermod -aG docker $USER` → 一度ログアウト/ログイン
-  - 確認: `docker --version && docker compose version`
-- Windows: Docker Desktop（https://www.docker.com/products/docker-desktop/）をインストールし、同様にバージョン確認
+# 4. アプリにアクセス
+ブラウザ: http://localhost:8000/login/
 
-起動手順
-1. `.env` を作成（`.env.example` をコピー）
-2. `docker compose up -d --build`
-3. ブラウザで http://localhost:8000/ にアクセス（初期状態は管理サイトのみ）
+# 5. アプリ上の操作
+ログイン後、申し込み、申し込み詳細/履歴などの各種機能の操作を行う。
 
-環境変数（.env）
-- `DJANGO_SECRET_KEY`（任意）
-- `DEBUG=true`
-- `DB_NAME=advasa`
-- `DB_USER=advasa`
-- `DB_PASSWORD=advasa`
-- `DB_HOST=db`
-- `DB_PORT=5432`
+```
 
-次のステップ
-- 実装課題は `TASKS.md` を参照してください。
+# 実装/未実装機能一覧
+## 実装済み機能
+
+- ユーザー登録（サインアップ）
+- JWT ログイン（access/refresh トークン）
+- /api/me/ による本人情報（残高）の取得
+- 申請作成（残高減算、残高不足時は400）
+- 申請一覧（ページネーション対応）
+- 申請詳細
+- ページテンプレート（login/apply/complete/history）
+- 単体テスト
+  - /api/me/ が残高を返す
+  - 申請成功で残高が減る
+  - 残高不足で 400 が返る
+  - 管理コマンド
+- 管理コマンド  
+
+## 未実装み機能
+- admin機能
+
+# 時間配分や優先順位
+実装 10hほど：
+- 全体的に機能単位でタスク割り振り&コミット
+- 理由としてはDjangoに不慣れなため、エラー発生時に影響範囲を最小化できるよう「機能単位」で着手
+- 順序:
+  1. サインアップ機能（1.5h）
+  2. ログイン機能 (1.5h)
+  3. 申請機能 (2h)
+  4. 申込詳細機能 (1h)
+  5. 申込履歴表示機能 (1h)
+  6. 単体テスト (1h)
+  7. 管理コマンド機能 (1.5h)
+- 難易度が高そう、アプリ上重要な機能なりモデルが存在するものから優先的に作業に着手
+- GETよりもPOSTで処理される機能の方が時間がかかりそうだったので、多くウェイトを割いた
+- 申請関連の作業を行うにしてもユーザー関連の機能が存在していることが前提で、最初にユーザー周り機能の実装に着手
+- 申請周りについては、画面上では申請→詳細表示→履歴表示という流れであったのでその順番で実装
+- 単体テストについては主要機能の動作確認の意味合いも込めて後半に後回し
+- 管理コマンドについてもユーザー・申請周りの機能ありきのものなので後回し
+
+
+学習 3-4hほど：Django/DRF/JWT の公式チュートリアルで内容の把握
+※開発着手前に実施
+
